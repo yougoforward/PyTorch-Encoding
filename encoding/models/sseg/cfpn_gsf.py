@@ -146,7 +146,7 @@ class localUp(nn.Module):
 def get_cfpn_gsf(dataset='pascal_voc', backbone='resnet50', pretrained=False,
                  root='~/.encoding/models', **kwargs):
     # infer number of classes
-    from ..datasets import datasets
+    from ...datasets import datasets
     model = cfpn_gsf(datasets[dataset.lower()].NUM_CLASS, backbone=backbone, root=root, **kwargs)
     if pretrained:
         raise NotImplementedError
