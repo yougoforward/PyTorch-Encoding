@@ -149,7 +149,7 @@ class Trainer():
                                        backbone = args.backbone, aux = args.aux,
                                        se_loss = args.se_loss, norm_layer = SyncBatchNorm,
                                        base_size=args.base_size, crop_size=args.crop_size)
-        print(model)
+        # print(model)
         # optimizer using different LR
         params_list = [{'params': model.pretrained.parameters(), 'lr': args.lr},]
         if hasattr(model, 'head'):
@@ -199,6 +199,9 @@ class Trainer():
         for i, (image, target) in enumerate(tbar):
             self.scheduler(self.optimizer, i, epoch, self.best_pred)
             self.optimizer.zero_grad()
+            if torch_ver == "0.3":
+                image = Variable(image)
+                target = Variable(target)
             outputs = self.model(image)
             loss = self.criterion(outputs, target)
             loss.backward()
@@ -233,8 +236,14 @@ class Trainer():
         total_inter, total_union, total_correct, total_label = 0, 0, 0, 0
         tbar = tqdm(self.valloader, desc='\r')
         for i, (image, target) in enumerate(tbar):
-            with torch.no_grad():
+            if torch_ver == "0.3":
+                image = Variable(image, volatile=True)
                 correct, labeled, inter, union = eval_batch(self.model, image, target)
+            else:
+                with torch.no_grad():
+                    correct, labeled, inter, union = eval_batch(self.model, image, target)
+            # with torch.no_grad():
+            #     correct, labeled, inter, union = eval_batch(self.model, image, target)
 
             total_correct += correct
             total_label += labeled
@@ -270,4 +279,6 @@ if __name__ == "__main__":
         for epoch in range(trainer.args.start_epoch, trainer.args.epochs):
             trainer.training(epoch)
             if not trainer.args.no_val:
-                trainer.validation(epoch)
+                if epoch%20==0 or epoch > trainer.args.epochs-8:
+                    trainer.validation(epoch)
+                # trainer.validation(epoch)
