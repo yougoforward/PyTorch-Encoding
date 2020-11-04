@@ -52,7 +52,7 @@ def get_backbone(name, **kwargs):
     return net
 
 class BaseNet(nn.Module):
-    def __init__(self, nclass, backbone, aux, se_loss, dilated=True, norm_layer=None,
+    def __init__(self, nclass, backbone, aux, se_loss, dilated=False, norm_layer=None,
                  base_size=520, crop_size=480, mean=[.485, .456, .406],
                  std=[.229, .224, .225], root='~/.encoding/models', *args, **kwargs):
         super(BaseNet, self).__init__()
